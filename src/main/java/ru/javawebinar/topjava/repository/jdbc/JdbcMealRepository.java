@@ -7,14 +7,13 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Repository;
 import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.repository.MealRepository;
-import ru.javawebinar.topjava.util.Util;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Repository
 public class JdbcMealRepository implements MealRepository {
@@ -71,14 +70,14 @@ public class JdbcMealRepository implements MealRepository {
 
     @Override
     public List<Meal> getAll(int userId) {
-        return jdbcTemplate.query("SELECT * FROM MEALS WHERE user_id = ?",ROW_MAPPER,userId);
+        return jdbcTemplate.query("SELECT * FROM MEALS WHERE user_id = ?", ROW_MAPPER, userId);
     }
 
     @Override
-    public List<Meal> getBetweenHalfOpen(LocalDateTime startDateTime, LocalDateTime endDateTime, int userId) {
-        return getAll(userId)
-                .stream()
-                .filter(meal -> Util.isBetweenHalfOpen(meal.getDateTime(),startDateTime,endDateTime))
-                .collect(Collectors.toList());
+    public List<Meal> getBetweenHalfOpen(@Nullable LocalDateTime startDateTime, @Nullable LocalDateTime endDateTime, int userId) {
+        startDateTime = (startDateTime == null) ? LocalDateTime.MIN : startDateTime;
+        endDateTime = (endDateTime == null) ? LocalDateTime.MAX : endDateTime;
+        return jdbcTemplate.query("SELECT * FROM MEALS WHERE user_id = ? " +
+                "AND datetime between ? and ?", ROW_MAPPER, userId, startDateTime, endDateTime);
     }
 }
