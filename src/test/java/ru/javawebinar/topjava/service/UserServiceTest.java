@@ -9,6 +9,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.SqlConfig;
 import org.springframework.test.context.junit4.SpringRunner;
+import ru.javawebinar.topjava.AssertMatcher;
 import ru.javawebinar.topjava.UserTestData;
 import ru.javawebinar.topjava.model.Role;
 import ru.javawebinar.topjava.model.User;
@@ -31,10 +32,13 @@ public class UserServiceTest {
         // Only for postgres driver logging
         // It uses java.util.logging and logged via jul-to-slf4j bridge
         SLF4JBridgeHandler.install();
+        ASSERT_MATCHER = AssertMatcher.of("registered","roles");
     }
 
     @Autowired
     private UserService service;
+
+    private final static AssertMatcher<User> ASSERT_MATCHER;
 
     @Test
     public void create() {
@@ -42,8 +46,8 @@ public class UserServiceTest {
         Integer newId = created.getId();
         User newUser = getNew();
         newUser.setId(newId);
-        assertMatch(created, newUser);
-        assertMatch(service.get(newId), newUser);
+        ASSERT_MATCHER.assertMatch(created, newUser);
+        ASSERT_MATCHER.assertMatch(service.get(newId), newUser);
     }
 
     @Test
@@ -66,7 +70,7 @@ public class UserServiceTest {
     @Test
     public void get() {
         User user = service.get(USER_ID);
-        assertMatch(user, UserTestData.user);
+        ASSERT_MATCHER.assertMatch(user, UserTestData.user);
     }
 
     @Test
@@ -77,19 +81,19 @@ public class UserServiceTest {
     @Test
     public void getByEmail() {
         User user = service.getByEmail("admin@gmail.com");
-        assertMatch(user, admin);
+        ASSERT_MATCHER.assertMatch(user, admin);
     }
 
     @Test
     public void update() {
         User updated = getUpdated();
         service.update(updated);
-        assertMatch(service.get(USER_ID), getUpdated());
+        ASSERT_MATCHER.assertMatch(service.get(USER_ID), getUpdated());
     }
 
     @Test
     public void getAll() {
         List<User> all = service.getAll();
-        assertMatch(all, admin, guest, user);
+        ASSERT_MATCHER.assertMatch(all, admin, guest, user);
     }
 }

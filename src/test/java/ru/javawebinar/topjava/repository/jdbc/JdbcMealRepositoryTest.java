@@ -8,11 +8,11 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.SqlConfig;
 import org.springframework.test.context.junit4.SpringRunner;
+import ru.javawebinar.topjava.AssertMatcher;
 import ru.javawebinar.topjava.MealTestData;
 import ru.javawebinar.topjava.model.Meal;
 
 import java.time.LocalDateTime;
-import java.time.Month;
 import java.util.List;
 
 import static org.junit.Assert.*;
@@ -33,19 +33,22 @@ public class JdbcMealRepositoryTest {
         // Only for postgres driver logging
         // It uses java.util.logging and logged via jul-to-slf4j bridge
         SLF4JBridgeHandler.install();
+        ASSERT_MATCHER = AssertMatcher.of("");
     }
 
     @Autowired
     private JdbcMealRepository jdbcMealRepository;
 
+    private static final AssertMatcher<Meal> ASSERT_MATCHER;
+
     @Test
     public void save() {
-        Meal created = jdbcMealRepository.save(getNew(), USER_ID);
         Meal newMeal = getNew();
+        Meal created = jdbcMealRepository.save(newMeal, USER_ID);
         Integer id = created.getId();
         newMeal.setId(id);
-        assertMatch(created, newMeal);
-        assertMatch(jdbcMealRepository.get(id, USER_ID), newMeal);
+        ASSERT_MATCHER.assertMatch(created, newMeal);
+        ASSERT_MATCHER.assertMatch(jdbcMealRepository.get(id, USER_ID), newMeal);
     }
 
     @Test
@@ -57,25 +60,25 @@ public class JdbcMealRepositoryTest {
     @Test
     public void get() {
         Meal meal = jdbcMealRepository.get(MEAL2_ID, USER_ID);
-        assertMatch(meal, MealTestData.meal2);
+        ASSERT_MATCHER.assertMatch(meal, MealTestData.meal2);
     }
 
     @Test
     public void getAll() {
         List<Meal> meals = jdbcMealRepository.getAll(USER_ID);
-        assertMatch(meals, meal1, meal2);
+        ASSERT_MATCHER.assertMatch(meals, meal1, meal2);
     }
 
     @Test
     public void getBetween() {
         List<Meal> mealsBetweenTheRange = jdbcMealRepository.getBetweenHalfOpen(
                 LocalDateTime.parse("2019-01-01 00:00", DATE_TIME_FORMATTER), null, USER_ID);
-        assertMatch(mealsBetweenTheRange, meal2);
+        ASSERT_MATCHER.assertMatch(mealsBetweenTheRange, meal2);
     }
 
     @Test
     public void getBetweenWithNullDates() {
         List<Meal> meals = jdbcMealRepository.getBetweenHalfOpen(null, null, USER_ID);
-        assertMatch(meals, meal1, meal2);
+        ASSERT_MATCHER.assertMatch(meals, meal1, meal2);
     }
 }

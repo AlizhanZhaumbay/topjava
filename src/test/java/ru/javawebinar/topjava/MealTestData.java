@@ -31,16 +31,4 @@ public class MealTestData {
         return new Meal(MEAL1_ID, LocalDateTime.parse("2020-06-17 19:38"),
                 "Обновленная еда", 2300);
     }
-
-    public static void assertMatch(Meal actual, Meal expected) {
-        assertThat(actual).usingRecursiveComparison().ignoringFields("dateTime").isEqualTo(expected);
-    }
-
-    public static void assertMatch(Iterable<Meal> actual, Meal... expected) {
-        assertMatch(actual, Arrays.asList(expected));
-    }
-
-    public static void assertMatch(Iterable<Meal> actual, Iterable<Meal> expected) {
-        assertThat(actual).usingRecursiveComparison().ignoringFields("dateTime").isEqualTo(expected);
-    }
 }
