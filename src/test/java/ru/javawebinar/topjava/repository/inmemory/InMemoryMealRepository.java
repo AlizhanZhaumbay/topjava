@@ -31,9 +31,7 @@ public class InMemoryMealRepository implements MealRepository {
     private final Map<Integer, InMemoryBaseRepository<Meal>> usersMealsMap = new ConcurrentHashMap<>();
 
     {
-        InMemoryBaseRepository<Meal> inMemoryBaseRepository = new InMemoryBaseRepository<>();
-        MealsUtil.meals.forEach(meal -> inMemoryBaseRepository.map.put(meal.getId(), meal));
-        usersMealsMap.put(USER_ID, inMemoryBaseRepository);
+        MealsUtil.meals.forEach(meal -> save(meal, USER_ID));
     }
 
 
