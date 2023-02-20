@@ -27,8 +27,8 @@
 
     <!--    <context:component-scan base-package="ru.javawebinar.**.repository.jpa"/>-->
 
-    <context:component-scan base-package="ru.javawebinar.**.repository.datajpa"/>
-    <jpa:repositories base-package="ru.javawebinar.**.repository.datajpa"/>
+<!--    <context:component-scan base-package="ru.javawebinar.**.repository.datajpa"/>-->
+<!--    <jpa:repositories base-package="ru.javawebinar.**.repository.datajpa"/>-->
 
     <jdbc:initialize-database data-source="dataSource" enabled="${database.init}">
         <jdbc:script location="${jdbc.initLocation}"/>
@@ -37,7 +37,7 @@
 
     <!--        <context:component-scan base-package="ru.javawebinar.**.repository.jdbc"/>-->
 
-    <beans profile="hsqldb,datajpa,jpa">
+    <beans profile="hsqldb">
         <context:property-placeholder location="classpath:db/hsqldb.properties" system-properties-mode="OVERRIDE"/>
 
         <!--no pooling-->
@@ -47,8 +47,9 @@
               p:url="${database.url}"
               p:username="${database.username}"
               p:password="${database.password}"/>
+    </beans>
 
-        <tx:annotation-driven/>
+    <beans profile="datajpa,jpa">
 
         <bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"
               p:dataSource-ref="dataSource"
@@ -72,12 +73,16 @@
             </property>
         </bean>
 
+        <tx:annotation-driven/>
+
         <bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager"
               p:entityManagerFactory-ref="entityManagerFactory"/>
         <!-- Transaction manager for a single JPA EntityManagerFactory (alternative to JTA) -->
     </beans>
 
-    <beans profile="postgres,jdbc">
+    <beans profile="jdbc">
+
+        <context:component-scan base-package="ru.javawebinar.topjava.repository.jdbc"/>
         <!--
             For postgres driver logging
             It uses java.util.logging and logged via jul-to-slf4j bridge
@@ -91,9 +96,9 @@
             <constructor-arg ref="jdbcTemplate"/>
         </bean>
 
-        <bean class="org.springframework.beans.factory.config.MethodInvokingBean">
-            <property name="staticMethod" value="org.slf4j.bridge.SLF4JBridgeHandler.install"/>
-        </bean>
+    </beans>
+
+    <beans profile="postgres">
 
         <context:property-placeholder location="classpath:db/postgres.properties" system-properties-mode="OVERRIDE"/>
 
@@ -103,6 +108,20 @@
               p:url="${database.url}"
               p:username="${database.username}"
               p:password="${database.password}"/>
+
+        <bean class="org.springframework.beans.factory.config.MethodInvokingBean">
+            <property name="staticMethod" value="org.slf4j.bridge.SLF4JBridgeHandler.install"/>
+        </bean>
+    </beans>
+
+
+    <beans profile="jpa">
+        <context:component-scan base-package="ru.javawebinar.topjava.repository.jpa"/>
+    </beans>
+
+    <beans profile="datajpa">
+        <context:component-scan base-package="ru.javawebinar.topjava.repository.datajpa"/>
+        <jpa:repositories base-package="ru.javawebinar.topjava.repository.datajpa"/>
     </beans>
 
 </beans>
